@@ -2,17 +2,18 @@
 
 ## Premise
 
-Show how Tessl's tile ecosystem transforms garbage-tier AI coding skills into production-quality, reviewed, and scored tiles -- validated by SonarQube's own analysis.
+Show how Tessl's tile ecosystem transforms unreviewed AI coding prompts into production-quality, reviewed, and scored tiles -- validated by SonarQube's own analysis.
 
 ## Demo Flow
 
-1. **Show the bad skill** - a community Express API generator full of anti-patterns
-2. **Generate an app** using the bad skill - a task tracker API
-3. **Sonar MCP analysis** - reveal the horror (SQL injection, XSS, hardcoded secrets, eval, etc.)
-4. **Run tile-creator** - Tessl improves the skill and packages it as a reviewed tile
-5. **Publish to registry** - show the review scores and quality gates
-6. **Install the tile** and regenerate - same app, dramatically better code
-7. **Sonar MCP analysis again** - clean results, audience applauds
+1. **Show the uber-prompt** - a copy-pasted Express API generator full of anti-patterns
+2. **Generate an app** by pasting it into Claude Code - a task tracker API
+3. **Sonar MCP analysis** - reveal the horror (SQL injection, command injection, hardcoded secrets, eval, etc.)
+4. **Tessl review** - show the prompt fails quality checks (79%, content 65%)
+5. **Build a proper tile** with tile-creator - skill + security rules + code patterns
+6. **Publish to registry** - show the 100% review score
+7. **Install the tile** and regenerate - same app, dramatically better code
+8. **Sonar MCP analysis again** - 65 issues down to 1, zero security vulnerabilities
 
 ## Prerequisites
 
@@ -41,38 +42,21 @@ claude mcp add sonarqube \
   mcp/sonarqube
 ```
 
-Verify it works:
-```
-claude> Use sonarqube to ping the system
-```
-
-### 2. Install the Bad Skill
-
-Copy the bad skill to your Claude Code skills directory:
-```bash
-cp skills/bad-api-generator.md ~/.claude/skills/
-```
-
-Or for project-level (this demo only):
-```bash
-mkdir -p .claude/skills
-cp skills/bad-api-generator.md .claude/skills/
-```
-
-### 3. Tessl CLI
+### 2. Tessl CLI
 
 ```bash
-tessl auth login
+tessl login
+tessl install tessl-labs/tile-creator
 ```
 
 ## Files
 
 ```
 tessl-demo/
-├── README.md              # This file
-├── demo-script.md         # Step-by-step presenter script
-├── skills/
-│   └── bad-api-generator.md   # The deliberately bad skill
-├── app-bad/               # Generated during demo (bad version)
-└── app-good/              # Generated during demo (good version)
+├── README.md                # This file
+├── demo-script.md           # Step-by-step presenter script with exact commands
+├── uber-prompt.md           # The bad prompt (copy-pasted into Claude Code on stage)
+├── tiles/
+│   └── express-api-generator/   # The improved tile (published to registry)
+└── steps/                   # Versioned snapshots of each demo stage (fallbacks)
 ```
