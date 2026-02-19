@@ -7,22 +7,37 @@
 - [ ] `tessl whoami` returns `baruch@tessl.io`
 - [ ] Sonar MCP connected: restart Claude Code in demo directory, verify sonarqube tools load
 - [ ] SonarCloud project `jbaruch_tessl-demo` has analysis results at sonarcloud.io
-- [ ] Registry page loads: https://tessl.io/registry/jbaruch/express-api-generator/0.1.0
 - [ ] Pre-generated backups exist: `app-bad/` and `app-good/` in repo
+- [ ] Tile is NOT published (you publish live on stage in Act 5)
+- [ ] If you did a dry run, unpublish within 2 hours: `tessl tile unpublish --tile jbaruch/express-api-generator@0.1.0`
+- [ ] If the 2-hour unpublish window passed, bump version in `tiles/express-api-generator/tile.json` to `0.2.0`
 
 ### 5 Minutes Before Stage
 - [ ] Open Claude Code in `tessl-demo/` directory
 - [ ] Terminal font size: large (Cmd+= a few times)
 - [ ] Terminal theme: dark, high contrast
 - [ ] Browser tab 1: SonarCloud project page (for fallback)
-- [ ] Browser tab 2: Tessl registry page (for showing scores)
-- [ ] Run a quick test: `tessl list` (should show express-api-generator installed)
+- [ ] Browser tab 2: ready to navigate to Tessl registry after publish
+- [ ] Run clean demo reset (see below)
 
-### Reset for Clean Demo (if re-running)
+### Reset for Clean Demo (MUST run before every demo)
 ```bash
-# Delete generated apps (keep the pre-generated ones in git)
+# Uninstall the tile so Act 6 install is fresh
+tessl uninstall jbaruch/express-api-generator
+
+# Verify it's gone
+tessl list
+# Should only show: tessl-labs/tile-creator
+
+# Restore pre-generated app backups
 rm -rf app-bad/ app-good/
 git checkout -- app-bad/ app-good/
+```
+
+### After Demo Cleanup
+```bash
+# Unpublish within 2 hours so you can re-publish next time
+tessl tile unpublish --tile jbaruch/express-api-generator@0.1.0
 ```
 
 ---
@@ -316,7 +331,10 @@ Hardcoded creds: 3           0
 - Say: "This typically takes a few seconds, let me show you what it returns"
 
 ### If `tessl publish` fails
-- The tile is already published - just show the registry page in the browser
+- If it says "already published": you forgot to unpublish after the last run
+  - Bump version in `tiles/express-api-generator/tile.json` to `0.2.0` and re-publish
+  - Or just show the registry page in the browser (it's still there from last time)
+- If it's a network error: show the registry screenshot from browser tab
 
 ### If live code generation takes too long
 - Both `app-bad/` and `app-good/` are pre-generated and in the repo
