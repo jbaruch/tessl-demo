@@ -1,0 +1,2 @@
+Published: jbaruch/express-api-generator@0.1.0
+https://tessl.io/registry/jbaruch/express-api-generator/0.1.0
