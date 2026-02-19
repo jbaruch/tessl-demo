@@ -44,42 +44,34 @@ tessl tile unpublish --tile jbaruch/express-api-generator@0.1.0
 
 ---
 
-## ACT 1: The Wild West of AI Prompts (2 min)
+## ACT 1: The Uber-Prompt (2 min)
 
 ### Talking Point
 > "AI coding assistants are only as good as the context they're given.
-> And right now, people share prompts and coding instructions the same way
-> they shared Stack Overflow snippets ten years ago.
-> Someone writes a mega-prompt, posts it on Reddit or a blog,
-> and thousands of developers copy-paste it into their AI assistant.
-> No review. No scoring. No quality gate. Let me show you."
+> And right now, people share prompts the same way they shared
+> Stack Overflow snippets ten years ago. You find one that looks good,
+> you paste it in. Let me show you."
 
-### Action: Show the Uber-Prompt
+### Action: Show the Uber-Prompt (SELL IT, don't expose it)
 
-Open `uber-prompt.md` in the editor. Scroll through it slowly.
+Open `uber-prompt.md` in the editor. Scroll through it at a NATURAL pace - the way someone actually would when evaluating a prompt they found online.
 
-> "Here's one I found. An Express API generator prompt. Looks comprehensive, right?
-> Someone clearly put effort into this. Let's look closer."
+> "Here's one I found - an Express API generator. Let's see...
+> TypeScript, better-sqlite3, JWT authentication, CRUD endpoints,
+> export, import, reporting. Looks solid. Covers a lot of ground.
+> Someone clearly spent time on this."
 
-Call out these (don't read every one - the audience gets it fast):
+Scroll past the code blocks without stopping. Point at the structure:
 
-**SQL concatenation** (~line 42):
-> "See the database layer? String concatenation into SQL queries.
-> `status = '` plus the user input plus `'`. Classic injection vector."
+> "It's got database setup, auth middleware, route handlers, server config...
+> even key principles at the bottom. This is thorough."
 
-**Base64 passwords** (~line 89):
-> "Password hashing? Buffer.from, toString base64. That's encoding, not hashing."
+Glance at the Key Principles section at the end:
 
-**Auth bypass** (~line 84):
-> "The auth middleware catches JWT errors and... calls next() anyway. Everyone gets through."
+> "'Keep it simple. Don't over-engineer.' I like this person's philosophy.
+> Let's use it."
 
-**eval()** (~line 162):
-> "Data import? `eval()` with user input. In 2026."
-
-> "This isn't hypothetical. This is how context spreads today.
-> Someone copy-pastes this into Claude Code, generates an app,
-> ships it, and every vulnerability in this prompt is now in production.
-> Nobody reviewed it. Nobody scored it. Nobody even flagged it."
+**DO NOT point out the vulnerabilities.** The audience should feel the same false confidence a real developer would. Let SonarQube be the one to break the bad news in Act 2.
 
 ### Action: Generate the Bad App
 
@@ -94,12 +86,14 @@ Put it in the app-bad/ directory.
 
 Let Claude generate the code. It follows the prompt's patterns exactly.
 
+> "That was fast. We've got a working API. Let's see what we shipped."
+
 ---
 
-## ACT 2: What SonarQube Thinks (2 min)
+## ACT 2: The SonarQube Reality Check (2 min)
 
 ### Talking Point
-> "I don't need to tell you this code is bad. Let's ask SonarQube."
+> "Looks good so far, right? Let's run it through SonarQube."
 
 ### Action: Run Sonar Analysis
 
@@ -123,13 +117,15 @@ Show me the security vulnerabilities, bugs, and code smells grouped by severity.
 - **8 MINOR** - empty catch, import style, loop style
 
 ### Talking Point
-> "65 issues. 13 security blockers. SQL injection, command injection,
-> code injection through eval, path traversal, hardcoded credentials.
-> [pause]
-> This is what happens when you copy-paste unvetted prompts into your AI assistant.
-> The AI did exactly what the prompt told it to do. The prompt was the problem."
+> "65 issues. 13 security blockers.
+> [pause - let the audience read the findings]
+> SQL injection. Command injection. Hardcoded credentials.
+> eval() with user input. Path traversal.
+> That prompt I skimmed and said 'looks solid'? This is what was inside it.
+> And the AI did exactly what we asked. It followed the prompt perfectly.
+> That's the problem."
 
-Pause. Let it sink in.
+Pause. This is the gut-punch moment. The audience just felt what every developer feels when they paste a prompt without reading it.
 
 ---
 
