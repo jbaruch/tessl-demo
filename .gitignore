@@ -5,3 +5,5 @@ dist/
 .DS_Store
 app-bad/
 app-good/
+.tessl/
+tiles/
