@@ -1,8 +1,3 @@
----
-name: bad-api-generator
-description: Generates Express.js REST API endpoints with TypeScript. Use when the user asks to create a REST API, backend service, or CRUD endpoints for any domain model. Handles database setup, authentication, routing, and export/import functionality.
----
-
 # Express REST API Generator
 
 Generate a complete Express.js REST API with TypeScript for any domain model.

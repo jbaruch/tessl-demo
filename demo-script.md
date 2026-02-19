@@ -29,9 +29,11 @@ tessl uninstall jbaruch/express-api-generator
 tessl list
 # Should only show: tessl-labs/tile-creator
 
-# Restore pre-generated app backups
+# Delete any generated apps
 rm -rf app-bad/ app-good/
-git checkout -- app-bad/ app-good/
+
+# Clean up any skill directory created during demo
+rm -rf skills/bad-api-generator/
 ```
 
 ### After Demo Cleanup
@@ -42,42 +44,62 @@ tessl tile unpublish --tile jbaruch/express-api-generator@0.1.0
 
 ---
 
-## ACT 1: The Wild West of AI Skills (1.5 min)
+## ACT 1: The Wild West of AI Prompts (2 min)
 
 ### Talking Point
 > "AI coding assistants are only as good as the context they're given.
-> And right now, the ecosystem of community skills and prompts is... unreviewed.
-> Anyone can write a skill, share it, and suddenly thousands of developers
-> are generating code from it. Let me show you what that looks like."
+> And right now, people share prompts and coding instructions the same way
+> they shared Stack Overflow snippets ten years ago.
+> Someone writes a mega-prompt, posts it on Reddit or a blog,
+> and thousands of developers copy-paste it into their AI assistant.
+> No review. No scoring. No quality gate. Let me show you."
 
-### Action: Show the Bad Skill
+### Action: Show the Uber-Prompt
 
-Open `skills/bad-api-generator/SKILL.md` in the editor. Scroll through it slowly.
+Open `uber-prompt.md` in the editor. Scroll through it slowly.
 
-Call out these lines (don't read every one - the audience will get it fast):
+> "Here's one I found. An Express API generator prompt. Looks comprehensive, right?
+> Someone clearly put effort into this. Let's look closer."
 
-**Line 25** - SQL concatenation:
-> "Here's the database layer. See this? `username = '` plus username plus `'`. Direct string concatenation into SQL. Every query in this skill uses this pattern."
+Call out these (don't read every one - the audience gets it fast):
 
-**Line 41** - Base64 passwords:
-> "And here's the authentication. Password hashing? Base64 encoding. That's not hashing, that's... encoding."
+**SQL concatenation** (~line 42):
+> "See the database layer? String concatenation into SQL queries.
+> `status = '` plus the user input plus `'`. Classic injection vector."
 
-**Line 27** - Auth bypass:
-> "The auth middleware catches JWT errors and... calls `next()` anyway. Everyone gets through."
+**Base64 passwords** (~line 89):
+> "Password hashing? Buffer.from, toString base64. That's encoding, not hashing."
 
-**Line 102** - eval():
-> "And for importing data? `eval()`. With user input. In 2026."
+**Auth bypass** (~line 84):
+> "The auth middleware catches JWT errors and... calls next() anyway. Everyone gets through."
 
-> "This isn't hypothetical. This is a real pattern - someone wraps their habits
-> into a reusable skill, shares it, and every app generated from it inherits
-> these vulnerabilities. And nobody reviewed it."
+**eval()** (~line 162):
+> "Data import? `eval()` with user input. In 2026."
+
+> "This isn't hypothetical. This is how context spreads today.
+> Someone copy-pastes this into Claude Code, generates an app,
+> ships it, and every vulnerability in this prompt is now in production.
+> Nobody reviewed it. Nobody scored it. Nobody even flagged it."
+
+### Action: Generate the Bad App
+
+Copy-paste the uber-prompt into Claude Code, then type:
+
+```
+Now create a task tracker REST API following those patterns.
+Tasks with title, description, status, assignee, and priority.
+Include authentication, search/filter, export, import, and a report page.
+Put it in the app-bad/ directory.
+```
+
+Let Claude generate the code. It follows the prompt's patterns exactly.
 
 ---
 
 ## ACT 2: What SonarQube Thinks (2 min)
 
 ### Talking Point
-> "Let's not take my word for it. Let's ask SonarQube."
+> "I don't need to tell you this code is bad. Let's ask SonarQube."
 
 ### Action: Run Sonar Analysis
 
@@ -104,8 +126,8 @@ Show me the security vulnerabilities, bugs, and code smells grouped by severity.
 > "65 issues. 13 security blockers. SQL injection, command injection,
 > code injection through eval, path traversal, hardcoded credentials.
 > [pause]
-> This is what happens when unvetted skills generate your code.
-> The AI did exactly what the skill told it to do. The skill was the problem."
+> This is what happens when you copy-paste unvetted prompts into your AI assistant.
+> The AI did exactly what the prompt told it to do. The prompt was the problem."
 
 Pause. Let it sink in.
 
@@ -114,15 +136,24 @@ Pause. Let it sink in.
 ## ACT 3: Enter Tessl (1.5 min)
 
 ### Talking Point
-> "What if there was a way to review and score skills BEFORE they generate code?
-> That's what Tessl does. Let me show you."
+> "What if instead of random prompts, there was a reviewed, scored ecosystem
+> for AI coding context? That's what Tessl does.
+> Tessl turns prompts into tiles - versioned, reviewed packages of skills and rules.
+> Let me show you what happens when we take this uber-prompt
+> and try to make it a proper Tessl skill."
 
-### Action: Review the Bad Skill with Tessl
+### Action: Quick Tessl Review
 
-Type in Claude Code:
+> "First, let's see if this prompt even passes Tessl's review."
+
+The uber-prompt has no frontmatter - it's not even a valid skill. Add minimal frontmatter to make it reviewable:
+
 ```bash
+# The uber-prompt.md with frontmatter added is in skills/bad-api-generator/
 tessl skill review ./skills/bad-api-generator
 ```
+
+**NOTE:** For this to work live, you need to create `skills/bad-api-generator/SKILL.md` on stage by adding frontmatter to the uber-prompt. Or pre-create it (it's in `steps/02-skill-with-frontmatter/`).
 
 ### Expected Output (verified)
 ```
@@ -137,11 +168,13 @@ command injection, and broken authentication"
 ```
 
 ### Talking Point
-> "79% average. Sounds okay, right? But look at the content score: 65%.
-> And read what the judge says: 'extremely dangerous anti-patterns,
+> "79% average - sounds passable, right? But look at the content score: 65%.
+> And read what the judge says: 'extremely dangerous anti-patterns -
 > SQL injection, hardcoded secrets, eval, command injection, broken auth.'
-> Tessl catches the problem at the skill level, before a single line of
-> app code is generated."
+>
+> This is the difference. That uber-prompt had no quality gate.
+> Tessl catches these problems at the source - before a single line of
+> app code gets generated."
 
 ---
 
@@ -368,10 +401,15 @@ Buffer: if running long, skip showing the tile-creator scaffolding in Act 4 and 
 ## Exact Commands Quick Reference
 
 ```bash
-# Act 2: Sonar on bad app
-# (in Claude Code) Search for all sonarqube issues in jbaruch_tessl-demo project in app-bad/src files
+# Act 1: Copy-paste uber-prompt.md into Claude Code, then:
+# "Now create a task tracker REST API following those patterns..."
 
-# Act 3: Review bad skill
+# Act 2: Sonar on bad app (in Claude Code):
+# "Search for all sonarqube issues in jbaruch_tessl-demo project in app-bad/src files"
+
+# Act 3: Review bad skill (need frontmatter version)
+# Option A: copy from steps/02-skill-with-frontmatter/
+mkdir -p skills/bad-api-generator && cp steps/02-skill-with-frontmatter/SKILL.md skills/bad-api-generator/
 tessl skill review ./skills/bad-api-generator
 
 # Act 4: Install tile-creator
@@ -395,6 +433,9 @@ tessl tile publish tiles/express-api-generator
 # Act 6: Install
 tessl install jbaruch/express-api-generator
 
-# Act 6: Sonar on good app
-# (in Claude Code) Search for sonarqube issues in jbaruch_tessl-demo project in app-good/src files
+# Act 6: Sonar on good app (in Claude Code):
+# "Search for sonarqube issues in jbaruch_tessl-demo project in app-good/src files"
+
+# After demo: unpublish within 2 hours
+tessl tile unpublish --tile jbaruch/express-api-generator@0.1.0
 ```
