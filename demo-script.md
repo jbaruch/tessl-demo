@@ -6,40 +6,47 @@
 - [ ] Docker Desktop running
 - [ ] `tessl whoami` returns `baruch@tessl.io`
 - [ ] Sonar MCP connected: restart Claude Code in demo directory, verify sonarqube tools load
-- [ ] SonarCloud project `jbaruch_tessl-demo` has analysis results at sonarcloud.io
 - [ ] Repo has no `src/` directory (clean slate for live generation)
 - [ ] Tile is NOT published (you publish live on stage in Act 5)
-- [ ] If you did a dry run, unpublish within 2 hours: `tessl tile unpublish --tile jbaruch/express-api-generator@0.1.0`
-- [ ] If the 2-hour unpublish window passed, bump version in `tiles/express-api-generator/tile.json` to `0.2.0`
+- [ ] If you did a dry run, unpublish within 2 hours: `tessl tile unpublish --tile jbaruch/api-generator@0.1.0`
+- [ ] If the 2-hour unpublish window passed, bump version in `tiles/api-generator/tile.json` to `0.2.0`
 
 ### 5 Minutes Before Stage
 - [ ] Open Claude Code in `tessl-demo/` directory
 - [ ] Terminal font size: large (Cmd+= a few times)
 - [ ] Terminal theme: dark, high contrast
-- [ ] Browser tab 1: SonarCloud project page (for fallback)
+- [ ] Browser tab 1: ready for SonarCloud (project will be created fresh)
 - [ ] Browser tab 2: ready to navigate to Tessl registry after publish
 - [ ] Run clean demo reset (see below)
 
 ### Reset for Clean Demo (MUST run before every demo)
 ```bash
-# Uninstall the tile so Act 6 install is fresh
-tessl uninstall jbaruch/express-api-generator
+# 1. Nuke and recreate SonarCloud project (clean dashboard)
+#    - Go to https://sonarcloud.io/project/settings?id=jbaruch_tessl-demo
+#    - Scroll to bottom → Delete project
+#    - Go to https://sonarcloud.io/projects/create
+#    - Re-add jbaruch/tessl-demo from GitHub with Automatic Analysis
+#    - Dashboard is now empty until first push with code
 
-# Verify it's gone
+# 2. Uninstall tiles
+tessl uninstall jbaruch/api-generator 2>/dev/null
 tessl list
 # Should only show: tessl-labs/tile-creator
 
-# Delete any generated apps
-rm -rf src/
+# 3. Delete any generated code and skills
+rm -rf src/ package.json tsconfig.json .env.example skills/
 
-# Clean up any skill directory created during demo
-rm -rf skills/api-generator/
+# 4. Commit clean state and push (so SonarCloud has no code to analyze)
+git add -A && git commit -m "Reset for demo" && git push
 ```
 
 ### After Demo Cleanup
 ```bash
-# Unpublish within 2 hours so you can re-publish next time
-tessl tile unpublish --tile jbaruch/express-api-generator@0.1.0
+# Unpublish tile within 2 hours so you can re-publish next time
+tessl tile unpublish --tile jbaruch/api-generator@0.1.0
+
+# Nuke SonarCloud project again for next run
+# https://sonarcloud.io/project/settings?id=jbaruch_tessl-demo → Delete
 ```
 
 ---
