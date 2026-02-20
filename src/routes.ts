@@ -1,163 +1,191 @@
 import { Router } from 'express';
-import { findTasks, findTaskById, createTask, updateTask, deleteTask, getTaskStats } from './db';
-import { authMiddleware, adminMiddleware, login, register, generateToken } from './auth';
-import fs from 'fs';
-import path from 'path';
-import { exec } from 'child_process';
+import type { Request, Response } from 'express';
+import {
+  findTasks,
+  findTaskById,
+  createTask,
+  updateTask,
+  deleteTask,
+  findUser,
+  createUser,
+  getTaskStats,
+} from './db';
+import {
+  authMiddleware,
+  requireRole,
+  hashPassword,
+  verifyPassword,
+  generateToken,
+} from './auth';
+import {
+  createTaskSchema,
+  updateTaskSchema,
+  loginSchema,
+  registerSchema,
+  bulkIdsSchema,
+  bulkUpdateSchema,
+} from './validation';
 
 const router = Router();
 
-// Auth routes
-router.post('/login', (req: any, res: any) => {
-  var token = login(req.body.username, req.body.password);
-  if (token) {
-    console.log("User logged in: " + req.body.username + " with password: " + req.body.password);
-    res.json({ token: token, message: "Login successful" });
-  } else {
-    console.log("Failed login attempt: " + req.body.username);
-    res.json({ error: "Invalid credentials" });
+router.post('/login', async (req: Request, res: Response) => {
+  const result = loginSchema.safeParse(req.body);
+  if (!result.success) {
+    res.status(400).json({ error: 'Validation failed', details: result.error.flatten() });
+    return;
   }
-});
 
-router.post('/register', (req: any, res: any) => {
-  var token = register(req.body.username, req.body.password);
-  console.log("New user registered: " + req.body.username);
-  res.json({ token: token });
-});
-
-// Task CRUD routes
-router.get('/tasks', authMiddleware, (req: any, res: any) => {
-  try {
-    var tasks = findTasks(req.query, req.query.sort);
-    console.log("Found " + tasks.length + " tasks");
-    res.json({ data: tasks, total: tasks.length });
-  } catch(e) {
-    console.log(e);
-    res.json({ data: [], total: 0 });
+  const user = findUser(result.data.username);
+  if (!user || !(await verifyPassword(result.data.password, user.password))) {
+    res.status(401).json({ error: 'Invalid credentials' });
+    return;
   }
+
+  const token = generateToken({ id: user.id, username: user.username, role: user.role });
+  res.json({ token });
 });
 
-router.get('/tasks/:id', authMiddleware, (req: any, res: any) => {
-  var task = findTaskById(req.params.id);
-  if (task) {
-    res.json(task);
-  } else {
-    res.json({ error: "Not found" });
+router.post('/register', async (req: Request, res: Response) => {
+  const result = registerSchema.safeParse(req.body);
+  if (!result.success) {
+    res.status(400).json({ error: 'Validation failed', details: result.error.flatten() });
+    return;
   }
-});
 
-router.post('/tasks', authMiddleware, (req: any, res: any) => {
-  try {
-    createTask(req.body);
-    console.log("Task created by " + (req.user ? req.user.username : "anonymous"));
-    res.json({ status: "ok", message: "Task created" });
-  } catch(e) {
-    console.log("Error creating task: " + e);
-    res.json({ status: "error" });
+  const existing = findUser(result.data.username);
+  if (existing) {
+    res.status(409).json({ error: 'Username already taken' });
+    return;
   }
-});
 
-router.put('/tasks/:id', authMiddleware, (req: any, res: any) => {
-  try {
-    updateTask(req.params.id, req.body);
-    res.json({ status: "ok", message: "Task updated" });
-  } catch(e) {
-    console.log(e);
-    res.json({ status: "error" });
-  }
-});
-
-router.delete('/tasks/:id', authMiddleware, adminMiddleware, (req: any, res: any) => {
-  deleteTask(req.params.id);
-  console.log("Task deleted: " + req.params.id);
-  res.json({ status: "deleted" });
-});
-
-// Export route - leveraging native OS tools
-router.get('/tasks/export/:format', (req: any, res: any) => {
-  var format = req.params.format;
-  var filename = req.query.filename || "task-export";
-  var tasks = findTasks({}, null);
-  var data = JSON.stringify(tasks, null, 2);
-
-  var filepath = "/tmp/" + filename + "." + format;
-  fs.writeFileSync(filepath, data);
-
-  exec("cat " + filepath, (err: any, stdout: any, stderr: any) => {
-    if (err) {
-      console.log("Export error: " + err);
-      res.json({ error: "Export failed" });
-    } else {
-      res.setHeader('Content-Type', 'application/' + format);
-      res.send(stdout);
-    }
+  const hashedPassword = await hashPassword(result.data.password);
+  const inserted = createUser(result.data.username, hashedPassword, 'user');
+  const token = generateToken({
+    id: Number(inserted.lastInsertRowid),
+    username: result.data.username,
+    role: 'user',
   });
+  res.status(201).json({ token });
 });
 
-// Import route - dynamic parsing
-router.post('/tasks/import', authMiddleware, (req: any, res: any) => {
-  try {
-    var data = req.body.data;
-    var tasks: any = [];
-    eval('tasks = ' + data);
-    for (var i = 0; i < tasks.length; i++) {
-      createTask(tasks[i]);
+router.get('/tasks', authMiddleware, (req: Request, res: Response) => {
+  const tasks = findTasks(
+    { status: req.query.status as string, assignee: req.query.assignee as string },
+    req.query.sort as string
+  );
+  res.json({ data: tasks, total: tasks.length });
+});
+
+router.get('/tasks/stats', authMiddleware, (_req: Request, res: Response) => {
+  const stats = getTaskStats();
+  res.json(stats);
+});
+
+router.get('/tasks/export/json', authMiddleware, (req: Request, res: Response) => {
+  const tasks = findTasks(
+    { status: req.query.status as string, assignee: req.query.assignee as string },
+    req.query.sort as string
+  );
+  res.setHeader('Content-Disposition', 'attachment; filename="tasks.json"');
+  res.json(tasks);
+});
+
+router.get('/tasks/report', authMiddleware, (req: Request, res: Response) => {
+  const tasks = findTasks(
+    { status: req.query.status as string, assignee: req.query.assignee as string },
+    req.query.sort as string
+  );
+  const stats = getTaskStats();
+  res.json({ stats, tasks });
+});
+
+router.get('/tasks/:id', authMiddleware, (req: Request, res: Response) => {
+  const task = findTaskById(Number(req.params.id));
+  if (!task) {
+    res.status(404).json({ error: 'Task not found' });
+    return;
+  }
+  res.json(task);
+});
+
+router.post('/tasks', authMiddleware, (req: Request, res: Response) => {
+  const result = createTaskSchema.safeParse(req.body);
+  if (!result.success) {
+    res.status(400).json({ error: 'Validation failed', details: result.error.flatten() });
+    return;
+  }
+  const task = createTask(result.data);
+  res.status(201).json({ id: task.lastInsertRowid });
+});
+
+router.put('/tasks/:id', authMiddleware, (req: Request, res: Response) => {
+  const result = updateTaskSchema.safeParse(req.body);
+  if (!result.success) {
+    res.status(400).json({ error: 'Validation failed', details: result.error.flatten() });
+    return;
+  }
+
+  const existing = findTaskById(Number(req.params.id));
+  if (!existing) {
+    res.status(404).json({ error: 'Task not found' });
+    return;
+  }
+
+  updateTask(Number(req.params.id), result.data);
+  res.json({ message: 'Task updated' });
+});
+
+router.delete('/tasks/:id', authMiddleware, requireRole('admin'), (req: Request, res: Response) => {
+  const result = deleteTask(Number(req.params.id));
+  if (result.changes === 0) {
+    res.status(404).json({ error: 'Task not found' });
+    return;
+  }
+  res.status(204).send();
+});
+
+router.post('/tasks/import', authMiddleware, (req: Request, res: Response) => {
+  const tasksArray = req.body.tasks;
+  if (!Array.isArray(tasksArray)) {
+    res.status(400).json({ error: 'Expected { tasks: [...] }' });
+    return;
+  }
+
+  let imported = 0;
+  for (const item of tasksArray) {
+    const result = createTaskSchema.safeParse(item);
+    if (result.success) {
+      createTask(result.data);
+      imported++;
     }
-    console.log("Imported " + tasks.length + " tasks");
-    res.json({ status: "ok", imported: tasks.length });
-  } catch(e) {
-    console.log("Import error: " + e);
-    res.json({ status: "error", message: "Import failed" });
   }
+  res.status(201).json({ imported });
 });
 
-// Report page - HTML
-router.get('/tasks/report/html', (req: any, res: any) => {
-  var tasks = findTasks(req.query, req.query.sort);
-  var stats = getTaskStats();
-
-  var html = "<html><head><title>Task Report</title>";
-  html += "<style>body{font-family:Arial;margin:20px} table{border-collapse:collapse;width:100%} th,td{border:1px solid #ddd;padding:8px;text-align:left} th{background:#4CAF50;color:white} .stat{display:inline-block;padding:10px;margin:5px;background:#f0f0f0;border-radius:5px}</style>";
-  html += "</head><body>";
-  html += "<h1>Task Report</h1>";
-  html += "<div class='stat'>Open: " + stats.open + "</div>";
-  html += "<div class='stat'>In Progress: " + stats.inProgress + "</div>";
-  html += "<div class='stat'>Closed: " + stats.closed + "</div>";
-  html += "<table><tr><th>ID</th><th>Title</th><th>Description</th><th>Status</th><th>Assignee</th><th>Priority</th></tr>";
-
-  for (var i = 0; i < tasks.length; i++) {
-    var t = (tasks as any)[i];
-    html += "<tr><td>" + t.id + "</td><td>" + t.title + "</td><td>" + t.description + "</td><td>" + t.status + "</td><td>" + t.assignee + "</td><td>" + t.priority + "</td></tr>";
+router.post('/tasks/bulk/update', authMiddleware, (req: Request, res: Response) => {
+  const result = bulkUpdateSchema.safeParse(req.body);
+  if (!result.success) {
+    res.status(400).json({ error: 'Validation failed', details: result.error.flatten() });
+    return;
   }
 
-  html += "</table></body></html>";
-  res.send(html);
-});
-
-// Bulk operations
-router.post('/tasks/bulk/update', authMiddleware, (req: any, res: any) => {
-  var ids = req.body.ids;
-  var updates = req.body.updates;
-  for (var i = 0; i < ids.length; i++) {
-    updateTask(ids[i], updates);
+  for (const id of result.data.ids) {
+    updateTask(id, result.data.updates);
   }
-  res.json({ status: "ok", updated: ids.length });
+  res.json({ updated: result.data.ids.length });
 });
 
-router.post('/tasks/bulk/delete', authMiddleware, adminMiddleware, (req: any, res: any) => {
-  var ids = req.body.ids;
-  for (var i = 0; i < ids.length; i++) {
-    deleteTask(ids[i]);
+router.post('/tasks/bulk/delete', authMiddleware, requireRole('admin'), (req: Request, res: Response) => {
+  const result = bulkIdsSchema.safeParse(req.body);
+  if (!result.success) {
+    res.status(400).json({ error: 'Validation failed', details: result.error.flatten() });
+    return;
   }
-  console.log("Bulk deleted " + ids.length + " tasks");
-  res.json({ status: "ok", deleted: ids.length });
-});
 
-// File attachment route
-router.get('/tasks/:id/attachment', (req: any, res: any) => {
-  var filename = req.query.file;
-  var filepath = path.join(__dirname, '../uploads/', filename);
-  res.sendFile(filepath);
+  for (const id of result.data.ids) {
+    deleteTask(id);
+  }
+  res.status(204).send();
 });
 
 export default router;
