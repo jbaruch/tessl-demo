@@ -5,3 +5,8 @@ dist/
 .DS_Store
 .tessl/
 tiles/
+.claude/
+.codex/
+AGENTS.md
+CLAUDE.md
+skills/

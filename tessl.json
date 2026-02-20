@@ -4,6 +4,30 @@
   "dependencies": {
     "tessl-labs/tile-creator": {
       "version": "1.1.0"
+    },
+    "tessl/npm-express": {
+      "version": "5.1.0"
+    },
+    "tessl/npm-zod": {
+      "version": "4.3.0"
+    },
+    "tessl/npm-better-sqlite3": {
+      "version": "12.2.0"
+    },
+    "tessl/npm-jsonwebtoken": {
+      "version": "9.0.0"
+    },
+    "tessl/npm-bcrypt": {
+      "version": "6.0.0"
+    },
+    "tessl/npm-helmet": {
+      "version": "8.1.0"
+    },
+    "tessl/npm-express-rate-limit": {
+      "version": "8.1.0"
+    },
+    "tessl/npm-cors": {
+      "version": "2.8.0"
     }
   }
 }
