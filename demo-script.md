@@ -298,49 +298,22 @@ across all dimensions"
 
 ---
 
-## ACT 5: Publish and Show Registry (1 min)
-
-### Action: Publish
-
-```bash
-tessl tile publish tiles/express-api-generator
-```
-
-### Action: Show Registry
-
-Switch to browser, show https://tessl.io/registry/jbaruch/express-api-generator/0.1.0
-
-Point at:
-- **Overall score: 100%**
-- **Review: 100%**
-- **Validation: 11/11 Passed** (all green boxes)
-- The security rules visible on the overview tab
+## ACT 5: The Proof - Same App, Different Outcome (2 min)
 
 ### Talking Point
-> "When we publish to the Tessl registry, every tile gets scored.
-> Review score, validation checks - all visible.
-> Any developer can see this before they install.
-> No more blind trust in random markdown files from the internet."
+> "Now let's use this tile to rebuild the same app and see what SonarQube thinks."
 
----
+### Action: Regenerate the App
 
-## ACT 6: The Proof - Same App, Different Outcome (2 min)
-
-### Action: Install and Generate
-
-```bash
-tessl install jbaruch/express-api-generator
+In Claude Code:
+```
+Using the newly created tile, recreate the app.
+Delete the old src/ and write a new one.
+Same task tracker - tasks with title, description, status, assignee, priority.
+Include authentication, search/filter, export, import, report, bulk operations.
 ```
 
-Then in Claude Code:
-```
-Create a task tracker REST API with the express-api-generator skill.
-Tasks with title, description, status, assignee, and priority.
-Include authentication, search/filter, bulk operations, and stats.
-Delete the old src/ first and regenerate in the same place.
-```
-
-> "Same directory. Same app. Let's see if the tile makes a difference."
+> "Same app. Same features. Let's see if the tile makes a difference."
 
 ### Action: Commit, Push, and Analyze
 
@@ -355,23 +328,47 @@ Search for all sonarqube issues in the jbaruch_tessl-demo project in the src/ fi
 Show me security vulnerabilities, bugs, and code smells.
 ```
 
-Switch to SonarCloud browser tab - the dashboard should show the issues resolving.
+Switch to SonarCloud browser tab - the dashboard should show all issues resolved.
 
 ### Expected Results (verified)
-- **1 total issue**
-- **0 BLOCKER** (zero security vulnerabilities)
+- **0 total issues**
+- **0 BLOCKER**
 - **0 CRITICAL**
-- **1 MAJOR** - "prefer optional chaining" (code style suggestion)
+- **0 MAJOR**
 - **0 MINOR**
 
 ### Talking Point
-> "65 issues down to 1. Thirteen security blockers down to zero.
-> And that one remaining issue? A style suggestion - 'prefer optional chaining.'
-> Not a security vulnerability. Not a bug. A style preference.
+> "65 issues down to zero. Thirteen security blockers - gone.
+> SQL injection, command injection, eval, path traversal, hardcoded secrets - all gone.
 >
-> Same prompt. Same requirements. Same AI.
-> The only difference is the skill that guided it.
-> A reviewed, scored, trusted skill from the Tessl registry."
+> Same app. Same features. Same AI.
+> The only difference is the context that guided it.
+> A reviewed, scored tile instead of a random prompt from the internet."
+
+---
+
+## ACT 6: Publish and Close (1 min)
+
+### Action: Publish the Tile
+
+> "Now that we've verified it works, let's publish it."
+
+```bash
+tessl tile publish tiles/api-generator
+```
+
+Switch to browser, show the registry page.
+
+Point at:
+- **Overall score: 100%**
+- **Review: 100%**
+- **Validation: 11/11 Passed** (all green boxes)
+- The security rules visible on the overview tab
+
+### Talking Point
+> "When we publish to the Tessl registry, every tile gets scored.
+> Review score, validation checks - all visible before anyone installs it.
+> No more blind trust."
 
 ---
 
@@ -384,8 +381,8 @@ Switch to SonarCloud browser tab - the dashboard should show the issues resolvin
 > SonarQube validates the output.
 > Together, they close the loop on AI code quality.
 >
-> The tile we just built is live in the registry right now.
-> You can install it today and start generating secure Express APIs.
+> Everything you saw today is in a public GitHub repo - jbaruch/tessl-demo.
+> Go to tessl.io to start building reviewed, scored tiles for your team.
 >
 > Thank you."
 
@@ -405,10 +402,10 @@ Validation:     passed       11/11
 
 BEFORE (Sonar)               AFTER (Sonar)
 ─────────────────────────────────────────
-Total issues:   65           1
+Total issues:   65           0
 Blockers:       13           0
 Critical:       31           0
-Major:          2            1
+Major:          2            0
 Minor:          8            0
 SQL injection:  8            0
 Cmd injection:  1            0
@@ -454,12 +451,12 @@ Hardcoded creds: 3           0
 
 | Act | Duration | Cumulative |
 |-----|----------|------------|
-| 1. The Wild West | 1.5 min | 1.5 min |
-| 2. Sonar Reality Check | 2 min | 3.5 min |
-| 3. Enter Tessl | 1.5 min | 5 min |
-| 4. Build Better Tile | 2 min | 7 min |
-| 5. Publish + Registry | 1 min | 8 min |
-| 6. Good App + Sonar | 2 min | 10 min |
+| 1. The Uber-Prompt | 2 min | 2 min |
+| 2. Sonar Reality Check | 2 min | 4 min |
+| 3. Enter Tessl | 1.5 min | 5.5 min |
+| 4. Build Better Tile | 2 min | 7.5 min |
+| 5. Rebuild + Sonar | 2 min | 9.5 min |
+| 6. Publish + Close | 1 min | 10.5 min |
 | Closing | 0.5 min | 10.5 min |
 
 **Total: ~10.5 minutes**
@@ -472,41 +469,38 @@ Buffer: if running long, skip showing the tile-creator scaffolding in Act 4 and 
 
 ```bash
 # Act 1: Copy-paste uber-prompt.md into Claude Code, then:
-# "Now create a task tracker REST API following those patterns..."
+# "Create a task tracker REST API following those patterns..."
+# Then: "Commit and push"
 
-# Act 2: Sonar on first app (in Claude Code):
+# Act 2: Sonar (in Claude Code):
 # "Search for all sonarqube issues in jbaruch_tessl-demo project in src/ files"
+# Then switch to SonarCloud browser
 
-# Act 6: Sonar on improved app (in Claude Code):
-# "Search for sonarqube issues in jbaruch_tessl-demo project in src/ files"
-
-# Act 3: Review skill (need frontmatter version)
-# Option A: copy from steps/02-skill-with-frontmatter/
-mkdir -p skills/api-generator && cp steps/02-skill-with-frontmatter/SKILL.md skills/api-generator/
+# Act 3: Convert prompt to skill and review
+mkdir -p skills/api-generator && cp uber-prompt.md skills/api-generator/SKILL.md
+# Add frontmatter: name: api-generator, description: "Generates Express REST APIs."
 tessl skill review ./skills/api-generator
 
 # Act 4: Install tile-creator
 tessl install tessl-labs/tile-creator
 
-# Act 4: Ask Claude Code to create the tile (type in Claude Code):
-# "Take the uber-prompt in uber-prompt.md and create a proper Tessl tile from it.
-#  The tile should be called jbaruch/express-api-generator in the jbaruch workspace.
+# Act 4: Ask Claude Code to create the tile:
+# "Using tile-creator, take uber-prompt.md and create a proper tile.
 #  Fix all the security anti-patterns that SonarQube found and codify them as always-on rules.
-#  Add code quality rules too. The skill should install Tessl documentation tiles
-#  for the libraries it uses. Put the tile in tiles/express-api-generator."
+#  Add code quality rules too. The skill should use tessl registry to find and read
+#  documentation for all dependencies. Name it jbaruch/api-generator, put in tiles/api-generator."
 
 # Act 4: Review improved skill
-tessl skill review ./tiles/express-api-generator/skills/express-api-generator
+tessl skill review ./tiles/api-generator/skills/api-generator
 
-# Act 5: Publish
-tessl tile publish tiles/express-api-generator
+# Act 5: Regenerate app with the tile (in Claude Code):
+# "Using the newly created tile, delete the old src/ and recreate the app."
+# Then: "Commit and push"
+# Sonar: "Search for sonarqube issues in jbaruch_tessl-demo project in src/ files"
 
-# Act 6: Install
-tessl install jbaruch/express-api-generator
-
-# Act 6: Sonar on good app (in Claude Code):
-# "Search for sonarqube issues in jbaruch_tessl-demo project in src/ files"
+# Act 6: Publish
+tessl tile publish tiles/api-generator
 
 # After demo: unpublish within 2 hours
-tessl tile unpublish --tile jbaruch/express-api-generator@0.1.0
+tessl tile unpublish --tile jbaruch/api-generator@0.1.0
 ```
