@@ -7,7 +7,7 @@
 - [ ] `tessl whoami` returns `baruch@tessl.io`
 - [ ] Sonar MCP connected: restart Claude Code in demo directory, verify sonarqube tools load
 - [ ] SonarCloud project `jbaruch_tessl-demo` has analysis results at sonarcloud.io
-- [ ] Pre-generated backups exist: `app-bad/` and `app-good/` in repo
+- [ ] Pre-generated backups exist: `app/` and `app-v2/` in repo
 - [ ] Tile is NOT published (you publish live on stage in Act 5)
 - [ ] If you did a dry run, unpublish within 2 hours: `tessl tile unpublish --tile jbaruch/express-api-generator@0.1.0`
 - [ ] If the 2-hour unpublish window passed, bump version in `tiles/express-api-generator/tile.json` to `0.2.0`
@@ -30,7 +30,7 @@ tessl list
 # Should only show: tessl-labs/tile-creator
 
 # Delete any generated apps
-rm -rf app-bad/ app-good/
+rm -rf app/ app-v2/
 
 # Clean up any skill directory created during demo
 rm -rf skills/bad-api-generator/
@@ -90,7 +90,7 @@ Copy-paste the uber-prompt into Claude Code, then type:
 Now create a task tracker REST API following those patterns.
 Tasks with title, description, status, assignee, and priority.
 Include authentication, search/filter, export, import, and a report page.
-Put it in the app-bad/ directory.
+Put it in the app/ directory.
 ```
 
 Let Claude generate the code. It follows the prompt's patterns exactly.
@@ -109,7 +109,7 @@ Let Claude generate the code. It follows the prompt's patterns exactly.
 Type in Claude Code:
 
 ```
-Search for all sonarqube issues in the jbaruch_tessl-demo project in the app-bad/src files.
+Search for all sonarqube issues in the jbaruch_tessl-demo project in the app/src files.
 Show me the security vulnerabilities, bugs, and code smells grouped by severity.
 ```
 
@@ -283,13 +283,13 @@ Then in Claude Code:
 Create a task tracker REST API with the express-api-generator skill.
 Tasks with title, description, status, assignee, and priority.
 Include authentication, search/filter, bulk operations, and stats.
-Put it in the app-good/ directory.
+Put it in the app-v2/ directory.
 ```
 
 ### Action: Sonar Analysis on Good App
 
 ```
-Search for all sonarqube issues in the jbaruch_tessl-demo project in the app-good/src files.
+Search for all sonarqube issues in the jbaruch_tessl-demo project in the app-v2/src files.
 Show me security vulnerabilities, bugs, and code smells.
 ```
 
@@ -375,8 +375,8 @@ Hardcoded creds: 3           0
 - If it's a network error: show the registry screenshot from browser tab
 
 ### If live code generation takes too long
-- Both `app-bad/` and `app-good/` are pre-generated and in the repo
-- `git checkout -- app-bad/ app-good/` to restore them instantly
+- Both `app/` and `app-v2/` are pre-generated and in the repo
+- `git checkout -- app/ app-v2/` to restore them instantly
 - Say: "In the interest of time, let me use the version I generated earlier"
 
 ### If network is completely down
@@ -410,7 +410,7 @@ Buffer: if running long, skip showing the tile-creator scaffolding in Act 4 and 
 # "Now create a task tracker REST API following those patterns..."
 
 # Act 2: Sonar on bad app (in Claude Code):
-# "Search for all sonarqube issues in jbaruch_tessl-demo project in app-bad/src files"
+# "Search for all sonarqube issues in jbaruch_tessl-demo project in app/src files"
 
 # Act 3: Review bad skill (need frontmatter version)
 # Option A: copy from steps/02-skill-with-frontmatter/
@@ -439,7 +439,7 @@ tessl tile publish tiles/express-api-generator
 tessl install jbaruch/express-api-generator
 
 # Act 6: Sonar on good app (in Claude Code):
-# "Search for sonarqube issues in jbaruch_tessl-demo project in app-good/src files"
+# "Search for sonarqube issues in jbaruch_tessl-demo project in app-v2/src files"
 
 # After demo: unpublish within 2 hours
 tessl tile unpublish --tile jbaruch/express-api-generator@0.1.0

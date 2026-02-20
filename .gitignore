@@ -3,7 +3,7 @@ dist/
 *.db
 .env
 .DS_Store
-app-bad/
-app-good/
+app/
+app-v2/
 .tessl/
 tiles/
