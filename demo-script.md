@@ -153,18 +153,42 @@ Pause. This is the gut-punch moment. The audience just felt what every developer
 > Let me show you what happens when we take this uber-prompt
 > and try to make it a proper Tessl skill."
 
-### Action: Quick Tessl Review
+### Action: Convert Prompt to Skill and Review
 
-> "First, let's see if this prompt even passes Tessl's review."
+> "First, let's see if this prompt even passes Tessl's review.
+> To review it, we need to turn it into a proper skill.
+> That just means adding a header and putting it in the right place."
 
-The uber-prompt has no frontmatter - it's not even a valid skill. Add minimal frontmatter to make it reviewable:
+Create the skill directory and file on stage:
 
 ```bash
-# The uber-prompt.md with frontmatter added is in skills/bad-api-generator/
+mkdir -p skills/bad-api-generator
+```
+
+Then in Claude Code (or manually in the editor):
+
+```
+Copy uber-prompt.md to skills/bad-api-generator/SKILL.md
+and add this YAML frontmatter at the very top:
+
+---
+name: bad-api-generator
+description: Generates Express.js REST API endpoints with TypeScript. Use when the user asks to create a REST API, backend service, or CRUD endpoints for any domain model. Handles database setup, authentication, routing, and export/import functionality.
+---
+```
+
+Then review it:
+
+```bash
 tessl skill review ./skills/bad-api-generator
 ```
 
-**NOTE:** For this to work live, you need to create `skills/bad-api-generator/SKILL.md` on stage by adding frontmatter to the uber-prompt. Or pre-create it (it's in `steps/02-skill-with-frontmatter/`).
+**FALLBACK:** If this takes too long live, the pre-made version is in `steps/02-skill-with-frontmatter/`:
+```bash
+mkdir -p skills/bad-api-generator
+cp steps/02-skill-with-frontmatter/SKILL.md skills/bad-api-generator/
+tessl skill review ./skills/bad-api-generator
+```
 
 ### Expected Output (verified)
 ```
