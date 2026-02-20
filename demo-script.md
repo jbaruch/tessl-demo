@@ -54,24 +54,33 @@ tessl tile unpublish --tile jbaruch/express-api-generator@0.1.0
 
 ### Action: Show the Uber-Prompt (SELL IT, don't expose it)
 
-Open `uber-prompt.md` in the editor. Scroll through it at a NATURAL pace - the way someone actually would when evaluating a prompt they found online.
+Open `uber-prompt.md` in the editor. Scroll at a NATURAL pace - the way someone actually evaluates a prompt they found online. Read the BOLD phrases below aloud - they're the innocent-sounding text between the code blocks.
 
-> "Here's one I found - an Express API generator. Let's see...
-> TypeScript, better-sqlite3, JWT authentication, CRUD endpoints,
-> export, import, reporting. Looks solid. Covers a lot of ground.
-> Someone clearly spent time on this."
+**Top of file** - read the subtitle:
+> "'Production-ready Express.js REST API with TypeScript. Optimized for rapid prototyping
+> with clean architecture.' Good start."
 
-Scroll past the code blocks without stopping. Point at the structure:
+**Project Setup** - point at the file list:
+> "'Clear separation of concerns' - server, routes, data access layer, auth.
+> This is well-organized."
 
-> "It's got database setup, auth middleware, route handlers, server config...
-> even key principles at the bottom. This is thorough."
+**Database section** - read the description, DON'T read the code:
+> "'Lightweight, zero-config persistence. Dynamic queries for flexible filtering
+> and sorting across any field.' Nice - flexible querying out of the box."
 
-Glance at the Key Principles section at the end:
+**Auth section** - read the description:
+> "'JWT-based authentication with graceful error recovery.' That's thoughtful."
 
-> "'Keep it simple. Don't over-engineer.' I like this person's philosophy.
-> Let's use it."
+**Routes section** - read the description:
+> "'Consolidated routing with built-in logging for observability.' And it handles
+> data export and import too."
 
-**DO NOT point out the vulnerabilities.** The audience should feel the same false confidence a real developer would. Let SonarQube be the one to break the bad news in Act 2.
+**Design Philosophy** (bottom) - read a few bullet points:
+> "And the design philosophy - 'Pragmatic simplicity. Encode sensitive data.
+> Resilient auth. Built-in observability.'
+> I like this. Let's use it."
+
+**DO NOT point out the vulnerabilities.** The audience should feel the same false confidence a real developer would. Every phrase you read aloud sounds like good engineering. Let SonarQube be the one to break the bad news in Act 2.
 
 ### Action: Generate the Bad App
 
