@@ -25,7 +25,8 @@
 #    - Go to https://sonarcloud.io/project/settings?id=jbaruch_tessl-demo
 #    - Scroll to bottom → Delete project
 #    - Go to https://sonarcloud.io/projects/create
-#    - Re-add jbaruch/tessl-demo from GitHub with Automatic Analysis
+#    - Re-add jbaruch/tessl-demo from GitHub
+#    - Go to Administration → Analysis Method → turn ON Automatic Analysis
 #    - Dashboard is now empty until first push with code
 
 # 2. Uninstall tiles
