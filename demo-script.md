@@ -113,6 +113,12 @@ Search for all sonarqube issues in the jbaruch_tessl-demo project in the app/src
 Show me the security vulnerabilities, bugs, and code smells grouped by severity.
 ```
 
+While Claude Code is fetching results, switch to the browser tab with SonarCloud. Show the project dashboard - the visual wall of red is the gut-punch.
+
+> "Let me show you this in SonarCloud while Claude pulls the details."
+
+**SonarCloud URL:** https://sonarcloud.io/project/overview?id=jbaruch_tessl-demo
+
 ### Expected Results (verified)
 - **65 total issues**
 - **13 BLOCKER** (all security vulnerabilities):
@@ -127,7 +133,7 @@ Show me the security vulnerabilities, bugs, and code smells grouped by severity.
 
 ### Talking Point
 > "65 issues. 13 security blockers.
-> [pause - let the audience read the findings]
+> [pause - let the audience read the SonarCloud dashboard]
 > SQL injection. Command injection. Hardcoded credentials.
 > eval() with user input. Path traversal.
 > That prompt I skimmed and said 'looks solid'? This is what was inside it.
@@ -292,6 +298,8 @@ Put it in the app-v2/ directory.
 Search for all sonarqube issues in the jbaruch_tessl-demo project in the app-v2/src files.
 Show me security vulnerabilities, bugs, and code smells.
 ```
+
+Switch to SonarCloud browser tab again for the visual contrast.
 
 ### Expected Results (verified)
 - **1 total issue**
