@@ -221,39 +221,48 @@ command injection via exec(), and authentication bypass"
 ## ACT 4: Build a Better Tile (2 min)
 
 ### Talking Point
-> "Let's fix this. Tessl has a tile-creator skill that helps you build
-> proper, reviewed tiles. Let me create a new tile from this bad skill."
+> "Let's fix this. Tessl has a tile-creator - itself a reviewed, scored tile -
+> that helps you build proper tiles. Let me install it and ask Claude Code
+> to take this bad prompt and turn it into something production-worthy."
 
-### Action: Create the Improved Tile
+### Action: Install tile-creator
 
-Type in Claude Code:
 ```bash
 tessl install tessl-labs/tile-creator
 ```
 
-Then:
-```bash
-tessl tile new \
-  --name jbaruch/express-api-generator \
-  --summary "Generates secure, production-ready Express.js REST APIs with TypeScript" \
-  --skill-name express-api-generator \
-  --skill-description "Generates Express.js REST API endpoints with TypeScript following security best practices. Use when the user asks to create a REST API, backend service, or CRUD endpoints." \
-  --rules express-security \
-  --workspace jbaruch \
-  --path "$PWD/tiles/express-api-generator"
+> "tile-creator is itself a tile from the Tessl registry.
+> A reviewed skill that knows how to build other skills properly."
+
+### Action: Ask Claude Code to Create the Tile
+
+Type in Claude Code (this is the key moment - Claude uses tile-creator to do the work):
+
+```
+Take the uber-prompt in uber-prompt.md and create a proper Tessl tile from it.
+The tile should be called jbaruch/express-api-generator in the jbaruch workspace.
+Fix all the security anti-patterns:
+- Parameterized SQL queries instead of string concatenation
+- bcrypt for password hashing
+- JWT secret from environment variables
+- Input validation with zod
+- Helmet for security headers
+- Rate limiting
+- No eval, no exec with user input
+- Proper error handling and HTTP status codes
+Include a security rules file for always-on constraints.
+Put the tile in tiles/express-api-generator.
 ```
 
-> "The tile-creator scaffolds the right structure: a skill with proper frontmatter,
-> a rules file for security constraints, and a references directory for code patterns.
-> Skills for workflows, rules for constraints, docs for reference - each has its place."
+Let Claude Code work. It will use the tile-creator skill to:
+1. Scaffold the proper structure (skill + rules + references)
+2. Write the improved skill with a step-by-step workflow and checkpoints
+3. Write the security rules as always-on constraints
+4. Write code pattern references
 
-### Action: Show the Improved Content
-
-Show the key files briefly (they're pre-written, you're just showing them):
-
-1. **rules/express-security.md** - "Always-on security constraints. Parameterized queries only. No hardcoded secrets. No eval. No silent auth bypass. These load into every agent session."
-
-2. **SKILL.md** - "A step-by-step workflow with checkpoints. Every step has a validation gate. And look - actual code examples showing the RIGHT way to do it."
+> "Notice what Claude is doing - it's using the tile-creator skill to structure this
+> the right way. Skills for the workflow, rules for the security constraints,
+> references for the code patterns. Each type of content in its proper place."
 
 ### Action: Review the Improved Skill
 
@@ -458,14 +467,11 @@ tessl skill review ./skills/bad-api-generator
 # Act 4: Install tile-creator
 tessl install tessl-labs/tile-creator
 
-# Act 4: Scaffold tile
-tessl tile new --name jbaruch/express-api-generator \
-  --summary "Generates secure, production-ready Express.js REST APIs" \
-  --skill-name express-api-generator \
-  --skill-description "Generates Express.js REST API endpoints with TypeScript following security best practices. Use when the user asks to create a REST API, backend service, or CRUD endpoints." \
-  --rules express-security \
-  --workspace jbaruch \
-  --path "$PWD/tiles/express-api-generator"
+# Act 4: Ask Claude Code to create the tile (paste this into Claude Code)
+# "Take the uber-prompt in uber-prompt.md and create a proper Tessl tile from it.
+#  The tile should be called jbaruch/express-api-generator in the jbaruch workspace.
+#  Fix all security anti-patterns. Include a security rules file.
+#  Put the tile in tiles/express-api-generator."
 
 # Act 4: Review improved skill
 tessl skill review ./tiles/express-api-generator/skills/express-api-generator
