@@ -167,7 +167,7 @@ Pause. This is the gut-punch moment. The audience just felt what every developer
 > for AI coding context? That's what Tessl does.
 > Tessl turns prompts into tiles - versioned, reviewed packages of skills and rules.
 > Let me show you what happens when we take this uber-prompt
-> and try to make it a proper Tessl skill."
+> and try to make it a proper Tessl tile."
 
 ### Action: Convert Prompt to Skill and Review
 
