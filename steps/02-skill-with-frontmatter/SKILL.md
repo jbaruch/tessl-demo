@@ -1,5 +1,5 @@
 ---
-name: bad-api-generator
+name: api-generator
 description: Generates Express REST APIs.
 ---
 

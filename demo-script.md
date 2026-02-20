@@ -33,7 +33,7 @@ tessl list
 rm -rf app/ app-v2/
 
 # Clean up any skill directory created during demo
-rm -rf skills/bad-api-generator/
+rm -rf skills/api-generator/
 ```
 
 ### After Demo Cleanup
@@ -82,7 +82,7 @@ Open `uber-prompt.md` in the editor. Scroll at a NATURAL pace - the way someone 
 
 **DO NOT point out the vulnerabilities.** The audience should feel the same false confidence a real developer would. Every phrase you read aloud sounds like good engineering. Let SonarQube be the one to break the bad news in Act 2.
 
-### Action: Generate the Bad App
+### Action: Generate the App
 
 Copy-paste the uber-prompt into Claude Code, then type:
 
@@ -162,11 +162,11 @@ Pause. This is the gut-punch moment. The audience just felt what every developer
 Create the skill directory and file on stage:
 
 ```bash
-mkdir -p skills/bad-api-generator
-cp uber-prompt.md skills/bad-api-generator/SKILL.md
+mkdir -p skills/api-generator
+cp uber-prompt.md skills/api-generator/SKILL.md
 ```
 
-Then open `skills/bad-api-generator/SKILL.md` in the editor and add frontmatter at the top. ACT IT OUT - look at the required fields, notice description is required, be visibly lazy about it:
+Then open `skills/api-generator/SKILL.md` in the editor and add frontmatter at the top. ACT IT OUT - look at the required fields, notice description is required, be visibly lazy about it:
 
 > "OK so we need a name and a description... name is easy...
 > description is required... 'Generates Express REST APIs.' There, good enough."
@@ -174,7 +174,7 @@ Then open `skills/bad-api-generator/SKILL.md` in the editor and add frontmatter 
 Add at the very top of the file:
 ```yaml
 ---
-name: bad-api-generator
+name: api-generator
 description: Generates Express REST APIs.
 ---
 ```
@@ -182,14 +182,14 @@ description: Generates Express REST APIs.
 Then review it:
 
 ```bash
-tessl skill review ./skills/bad-api-generator
+tessl skill review ./skills/api-generator
 ```
 
 **FALLBACK:** If this takes too long live, the pre-made version is in `steps/02-skill-with-frontmatter/`:
 ```bash
-mkdir -p skills/bad-api-generator
-cp steps/02-skill-with-frontmatter/SKILL.md skills/bad-api-generator/
-tessl skill review ./skills/bad-api-generator
+mkdir -p skills/api-generator
+cp steps/02-skill-with-frontmatter/SKILL.md skills/api-generator/
+tessl skill review ./skills/api-generator
 ```
 
 ### Expected Output (verified)
@@ -223,7 +223,7 @@ command injection via exec(), and authentication bypass"
 ### Talking Point
 > "Let's fix this. Tessl has a tile-creator - itself a reviewed, scored tile -
 > that helps you build proper tiles. Let me install it and ask Claude Code
-> to take this bad prompt and turn it into something production-worthy."
+> to take this prompt and turn it into something production-worthy."
 
 ### Action: Install tile-creator
 
@@ -243,7 +243,7 @@ Take the uber-prompt in uber-prompt.md and create a proper Tessl tile from it.
 The tile should be called jbaruch/express-api-generator in the jbaruch workspace.
 Fix all the security anti-patterns that SonarQube found and codify them as always-on rules.
 Add code quality rules too.
-The skill should install Tessl documentation tiles for the libraries it uses.
+The skill should install Tessl documentation tiles for the libraries it uses and use it while coding.
 Put the tile in tiles/express-api-generator.
 ```
 
@@ -372,14 +372,14 @@ Switch to SonarCloud browser tab again for the visual contrast.
 Keep this visible on your phone or a second screen:
 
 ```
-BAD SKILL                    GOOD TILE
+ORIGINAL SKILL               IMPROVED TILE
 ─────────────────────────────────────────
 Tessl Review:   49%          100%
 Description:    33%          100%
 Content Score:  65%          100%
 Validation:     passed       11/11
 
-BAD APP (Sonar)              GOOD APP (Sonar)
+FIRST APP (Sonar)            SECOND APP (Sonar)
 ─────────────────────────────────────────
 Total issues:   65           1
 Blockers:       13           0
@@ -431,7 +431,7 @@ Hardcoded creds: 3           0
 | Act | Duration | Cumulative |
 |-----|----------|------------|
 | 1. The Wild West | 1.5 min | 1.5 min |
-| 2. Sonar on Bad App | 2 min | 3.5 min |
+| 2. Sonar Reality Check | 2 min | 3.5 min |
 | 3. Enter Tessl | 1.5 min | 5 min |
 | 4. Build Better Tile | 2 min | 7 min |
 | 5. Publish + Registry | 1 min | 8 min |
@@ -450,13 +450,13 @@ Buffer: if running long, skip showing the tile-creator scaffolding in Act 4 and 
 # Act 1: Copy-paste uber-prompt.md into Claude Code, then:
 # "Now create a task tracker REST API following those patterns..."
 
-# Act 2: Sonar on bad app (in Claude Code):
+# Act 2: Sonar on first app (in Claude Code):
 # "Search for all sonarqube issues in jbaruch_tessl-demo project in app/src files"
 
-# Act 3: Review bad skill (need frontmatter version)
+# Act 3: Review skill (need frontmatter version)
 # Option A: copy from steps/02-skill-with-frontmatter/
-mkdir -p skills/bad-api-generator && cp steps/02-skill-with-frontmatter/SKILL.md skills/bad-api-generator/
-tessl skill review ./skills/bad-api-generator
+mkdir -p skills/api-generator && cp steps/02-skill-with-frontmatter/SKILL.md skills/api-generator/
+tessl skill review ./skills/api-generator
 
 # Act 4: Install tile-creator
 tessl install tessl-labs/tile-creator

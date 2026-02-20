@@ -55,7 +55,7 @@ tessl install tessl-labs/tile-creator
 tessl-demo/
 ├── README.md                # This file
 ├── demo-script.md           # Step-by-step presenter script with exact commands
-├── uber-prompt.md           # The bad prompt (copy-pasted into Claude Code on stage)
+├── uber-prompt.md           # The prompt (copy-pasted into Claude Code on stage)
 ├── tiles/
 │   └── express-api-generator/   # The improved tile (published to registry)
 └── steps/                   # Versioned snapshots of each demo stage (fallbacks)
