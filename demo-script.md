@@ -236,33 +236,27 @@ tessl install tessl-labs/tile-creator
 
 ### Action: Ask Claude Code to Create the Tile
 
-Type in Claude Code (this is the key moment - Claude uses tile-creator to do the work):
+Type in Claude Code (this is the key moment - Claude uses tile-creator AND Sonar context):
 
 ```
 Take the uber-prompt in uber-prompt.md and create a proper Tessl tile from it.
 The tile should be called jbaruch/express-api-generator in the jbaruch workspace.
-Fix all the security anti-patterns:
-- Parameterized SQL queries instead of string concatenation
-- bcrypt for password hashing
-- JWT secret from environment variables
-- Input validation with zod
-- Helmet for security headers
-- Rate limiting
-- No eval, no exec with user input
-- Proper error handling and HTTP status codes
-Include a security rules file for always-on constraints.
+Fix all the security anti-patterns that SonarQube found and codify them as always-on rules.
+Add code quality rules too.
+The skill should install Tessl documentation tiles for the libraries it uses.
 Put the tile in tiles/express-api-generator.
 ```
 
-Let Claude Code work. It will use the tile-creator skill to:
+Let Claude Code work. It has context from both tile-creator (how to structure tiles) and Sonar MCP (what security issues to fix). It will:
 1. Scaffold the proper structure (skill + rules + references)
-2. Write the improved skill with a step-by-step workflow and checkpoints
-3. Write the security rules as always-on constraints
-4. Write code pattern references
+2. Write security and quality rules based on what Sonar flagged
+3. Write the improved skill with a step-by-step workflow and checkpoints
+4. Include `tessl install` steps for library documentation tiles
 
-> "Notice what Claude is doing - it's using the tile-creator skill to structure this
-> the right way. Skills for the workflow, rules for the security constraints,
-> references for the code patterns. Each type of content in its proper place."
+> "Look at what's happening here. Claude has the Sonar findings in context,
+> and it's using the tile-creator skill to turn those findings into
+> prevention. Rules that fire before code is generated, not after.
+> That's shifting left on AI-generated code quality."
 
 ### Action: Review the Improved Skill
 
@@ -467,11 +461,12 @@ tessl skill review ./skills/bad-api-generator
 # Act 4: Install tile-creator
 tessl install tessl-labs/tile-creator
 
-# Act 4: Ask Claude Code to create the tile (paste this into Claude Code)
+# Act 4: Ask Claude Code to create the tile (type in Claude Code):
 # "Take the uber-prompt in uber-prompt.md and create a proper Tessl tile from it.
 #  The tile should be called jbaruch/express-api-generator in the jbaruch workspace.
-#  Fix all security anti-patterns. Include a security rules file.
-#  Put the tile in tiles/express-api-generator."
+#  Fix all the security anti-patterns that SonarQube found and codify them as always-on rules.
+#  Add code quality rules too. The skill should install Tessl documentation tiles
+#  for the libraries it uses. Put the tile in tiles/express-api-generator."
 
 # Act 4: Review improved skill
 tessl skill review ./tiles/express-api-generator/skills/express-api-generator
