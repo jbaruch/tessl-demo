@@ -95,7 +95,15 @@ Put it in the app/ directory.
 
 Let Claude generate the code. It follows the prompt's patterns exactly.
 
-> "That was fast. We've got a working API. Let's see what we shipped."
+> "That was fast. We've got a working API. Let's commit and push it."
+
+### Action: Commit and Push
+
+```
+Commit the app and push to GitHub.
+```
+
+> "Now let's see what SonarQube thinks of what we just shipped."
 
 ---
 
@@ -104,16 +112,16 @@ Let Claude generate the code. It follows the prompt's patterns exactly.
 ### Talking Point
 > "Looks good so far, right? Let's run it through SonarQube."
 
-### Action: Run Sonar Analysis
-
-Type in Claude Code:
+SonarCloud automatic analysis triggers on push - it takes ~30 seconds. Fill the time by asking Claude Code for the analysis (it queries the results via MCP):
 
 ```
 Search for all sonarqube issues in the jbaruch_tessl-demo project in the app/src files.
 Show me the security vulnerabilities, bugs, and code smells grouped by severity.
 ```
 
-While Claude Code is fetching results, switch to the browser tab with SonarCloud. Show the project dashboard - the visual wall of red is the gut-punch.
+**NOTE:** If the analysis hasn't finished yet, Claude will get the old results or empty results. That's fine - switch to the browser and refresh. The SonarCloud dashboard is the real show.
+
+Switch to the browser tab with SonarCloud. Show the project dashboard - the visual wall of red is the gut-punch.
 
 > "Let me show you this in SonarCloud while Claude pulls the details."
 
@@ -324,14 +332,20 @@ Include authentication, search/filter, bulk operations, and stats.
 Put it in the app-v2/ directory.
 ```
 
-### Action: Sonar Analysis on Good App
+### Action: Commit, Push, and Analyze
+
+```
+Commit the app-v2 and push to GitHub.
+```
+
+Then ask for Sonar analysis (while SonarCloud processes the push):
 
 ```
 Search for all sonarqube issues in the jbaruch_tessl-demo project in the app-v2/src files.
 Show me security vulnerabilities, bugs, and code smells.
 ```
 
-Switch to SonarCloud browser tab again for the visual contrast.
+Switch to SonarCloud browser tab for the visual contrast.
 
 ### Expected Results (verified)
 - **1 total issue**
