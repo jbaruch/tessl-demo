@@ -156,24 +156,26 @@ Pause. This is the gut-punch moment. The audience just felt what every developer
 ### Action: Convert Prompt to Skill and Review
 
 > "First, let's see if this prompt even passes Tessl's review.
-> To review it, we need to turn it into a proper skill.
+> To review it, we need to turn it into a Tessl skill.
 > That just means adding a header and putting it in the right place."
 
 Create the skill directory and file on stage:
 
 ```bash
 mkdir -p skills/bad-api-generator
+cp uber-prompt.md skills/bad-api-generator/SKILL.md
 ```
 
-Then in Claude Code (or manually in the editor):
+Then open `skills/bad-api-generator/SKILL.md` in the editor and add frontmatter at the top. ACT IT OUT - look at the required fields, notice description is required, be visibly lazy about it:
 
-```
-Copy uber-prompt.md to skills/bad-api-generator/SKILL.md
-and add this YAML frontmatter at the very top:
+> "OK so we need a name and a description... name is easy...
+> description is required... 'Generates Express REST APIs.' There, good enough."
 
+Add at the very top of the file:
+```yaml
 ---
 name: bad-api-generator
-description: Generates Express.js REST API endpoints with TypeScript. Use when the user asks to create a REST API, backend service, or CRUD endpoints for any domain model. Handles database setup, authentication, routing, and export/import functionality.
+description: Generates Express REST APIs.
 ---
 ```
 
@@ -193,21 +195,24 @@ tessl skill review ./skills/bad-api-generator
 ### Expected Output (verified)
 ```
 Validation: PASSED
-Description: 92%
+Description: 33%
 Content: 65%
-Average Score: 79% ⚠
+Average Score: 49% ⚠
 
-Assessment: "teaches extremely dangerous anti-patterns including
-SQL injection vulnerabilities, hardcoded secrets, eval() usage,
-command injection, and broken authentication"
+Assessment: "contains severe security vulnerabilities that make it
+dangerous to use: SQL injection via string concatenation, hardcoded
+JWT secrets, base64 'hashing' for passwords, eval() usage,
+command injection via exec(), and authentication bypass"
 ```
 
 ### Talking Point
-> "79% average - sounds passable, right? But look at the content score: 65%.
-> And read what the judge says: 'extremely dangerous anti-patterns -
-> SQL injection, hardcoded secrets, eval, command injection, broken auth.'
+> "49%. Fails the review. And look at what the judge found -
+> SQL injection, hardcoded secrets, base64 instead of hashing,
+> eval, command injection, auth bypass.
+> Every one of those 'pragmatic' design choices from the prompt?
+> A security vulnerability.
 >
-> This is the difference. That uber-prompt had no quality gate.
+> This is what a quality gate for AI context looks like.
 > Tessl catches these problems at the source - before a single line of
 > app code gets generated."
 
@@ -366,7 +371,8 @@ Keep this visible on your phone or a second screen:
 ```
 BAD SKILL                    GOOD TILE
 ─────────────────────────────────────────
-Tessl Review:   79%          100%
+Tessl Review:   49%          100%
+Description:    33%          100%
 Content Score:  65%          100%
 Validation:     passed       11/11
 
