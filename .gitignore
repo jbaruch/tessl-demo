@@ -3,6 +3,5 @@ dist/
 *.db
 .env
 .DS_Store
-app-v2/
 .tessl/
 tiles/
