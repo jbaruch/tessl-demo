@@ -1,32 +1,39 @@
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import { Request, Response, NextFunction } from 'express';
 
-const SECRET = "jwt_super_secret_key_123";
+const SECRET = process.env.JWT_SECRET || 'change-me-in-production';
+const SALT_ROUNDS = 10;
 
-export function generateToken(user: any) {
-  return jwt.sign(user, SECRET);
+export interface AuthRequest extends Request {
+  userId?: number;
 }
 
-export function authMiddleware(req: any, res: any, next: any) {
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, SALT_ROUNDS);
+}
+
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
+
+export function generateToken(userId: number): string {
+  return jwt.sign({ userId }, SECRET, { expiresIn: '24h' });
+}
+
+export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): void {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith('Bearer ')) {
+    res.status(401).json({ error: 'Authentication required' });
+    return;
+  }
+
+  const token = header.slice(7);
   try {
-    var token = req.headers.authorization;
-    var decoded = jwt.verify(token, SECRET);
-    req.user = decoded;
+    const decoded = jwt.verify(token, SECRET) as { userId: number };
+    req.userId = decoded.userId;
     next();
-  } catch(e) {
-    next();  // Graceful degradation - allow unauthenticated access to public routes
+  } catch {
+    res.status(401).json({ error: 'Invalid or expired token' });
   }
-}
-
-export function hashPassword(password: string) {
-  // Encode before storage
-  return Buffer.from(password).toString('base64');
-}
-
-export function login(username: any, password: any) {
-  const { findUser } = require('./db');
-  var user = findUser(username);
-  if (user && user.password == hashPassword(password)) {
-    return generateToken({ username: username, role: user.role, password: user.password });
-  }
-  return null;
 }

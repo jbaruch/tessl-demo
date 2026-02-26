@@ -28,6 +28,9 @@
     },
     "tessl/npm-cors": {
       "version": "2.8.0"
+    },
+    "jbaruch/express-rest-generator": {
+      "version": "0.1.0"
     }
   }
 }
