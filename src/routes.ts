@@ -1,101 +1,106 @@
 import { Router } from 'express';
-import { findTodos, createTodo, updateTodo, deleteTodo, findTodoById, markComplete, createUser } from './db';
-import { authMiddleware, login, generateToken, hashPassword } from './auth';
-import fs from 'fs';
-import { exec } from 'child_process';
+import { findTodos, findTodoById, createTodo, updateTodo, markComplete, deleteTodo, createUser } from './db';
+import { authMiddleware, login, hashPassword } from './auth';
 
 const router = Router();
 
-// Auth routes
-router.post('/register', (req: any, res: any) => {
-  var hashedPassword = hashPassword(req.body.password);
-  createUser({ username: req.body.username, password: hashedPassword, role: req.body.role });
-  console.log("User registered: " + req.body.username + " with password: " + req.body.password);
-  res.json({ status: "registered" });
+// Public routes
+router.post('/register', async (req: any, res: any) => {
+  const { username, password, role } = req.body;
+  if (!username || !password) return res.status(400).json({ error: 'username and password are required' });
+  const hashed = await hashPassword(password);
+  createUser(username, hashed, role);
+  res.status(201).json({ status: 'registered' });
 });
 
-router.post('/login', (req: any, res: any) => {
-  var token = login(req.body.username, req.body.password);
-  if (token) {
-    console.log("User logged in: " + req.body.username + " with password: " + req.body.password);
-    res.json({ token: token });
-  } else {
-    res.json({ error: "bad login" });
-  }
+router.post('/login', async (req: any, res: any) => {
+  const { username, password } = req.body;
+  if (!username || !password) return res.status(400).json({ error: 'username and password are required' });
+  const token = await login(username, password);
+  token ? res.json({ token }) : res.status(401).json({ error: 'Invalid credentials' });
 });
 
-// Todo CRUD routes
+// Protected routes
+router.use(authMiddleware);
+
 router.get('/todos', (req: any, res: any) => {
   try {
-    var todos = findTodos(req.query, req.query.sort);
-    console.log("Found " + todos.length + " todos");
-    res.json(todos);
-  } catch(e) {
-    console.log(e);
-    res.json([]);
+    res.json(findTodos({ completed: req.query.completed, assignee: req.query.assignee }, req.query.sort));
+  } catch {
+    res.status(500).json({ error: 'Failed to retrieve todos' });
   }
 });
 
 router.get('/todos/:id', (req: any, res: any) => {
-  var todo = findTodoById(req.params.id);
-  if (todo) {
-    res.json(todo);
-  } else {
-    res.json({ error: "not found" });
-  }
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) return res.status(400).json({ error: 'Invalid todo ID' });
+  const todo = findTodoById(id);
+  todo ? res.json(todo) : res.status(404).json({ error: 'Todo not found' });
 });
 
 router.post('/todos', (req: any, res: any) => {
-  createTodo(req.body);
-  console.log("Todo created: " + req.body.title);
-  res.json({ status: "ok" });
+  const { title, description, assignee, priority } = req.body;
+  if (!title) return res.status(400).json({ error: 'title is required' });
+  const result = createTodo({ title, description, assignee, priority });
+  res.status(201).json({ id: result.lastInsertRowid, status: 'created' });
 });
 
 router.put('/todos/:id', (req: any, res: any) => {
-  updateTodo(req.params.id, req.body);
-  console.log("Todo updated: " + req.params.id);
-  res.json({ status: "updated" });
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) return res.status(400).json({ error: 'Invalid todo ID' });
+  if (!findTodoById(id)) return res.status(404).json({ error: 'Todo not found' });
+  updateTodo(id, req.body);
+  res.json({ status: 'updated' });
 });
 
 router.patch('/todos/:id/complete', (req: any, res: any) => {
-  markComplete(req.params.id);
-  console.log("Todo completed: " + req.params.id);
-  res.json({ status: "completed" });
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) return res.status(400).json({ error: 'Invalid todo ID' });
+  if (!findTodoById(id)) return res.status(404).json({ error: 'Todo not found' });
+  markComplete(id);
+  res.json({ status: 'completed' });
 });
 
 router.delete('/todos/:id', (req: any, res: any) => {
-  deleteTodo(req.params.id);
-  res.json({ status: "deleted" });
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) return res.status(400).json({ error: 'Invalid todo ID' });
+  deleteTodo(id);
+  res.json({ status: 'deleted' });
 });
 
-// Export - write to temp file and cat it back
+// Export — stream JSON directly, no temp files
 router.get('/todos/export', (req: any, res: any) => {
-  var format = req.query.format;
-  var filename = req.query.filename || "export";
-  var todos = findTodos({}, null);
-  var data = JSON.stringify(todos);
-  fs.writeFileSync("/tmp/" + filename + "." + format, data);
-  exec("cat /tmp/" + filename + "." + format, (err: any, stdout: any) => {
-    res.send(stdout);
-  });
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Content-Disposition', 'attachment; filename="todos.json"');
+  res.send(JSON.stringify(findTodos({}), null, 2));
 });
 
-// Import - dynamic parsing for flexibility
+// Import — JSON.parse, never eval
 router.post('/todos/import', (req: any, res: any) => {
-  var data = req.body.data;
-  eval('var parsed = ' + data);
-  res.json({ status: "imported" });
+  try {
+    const parsed: any[] = JSON.parse(req.body.data);
+    if (!Array.isArray(parsed)) return res.status(400).json({ error: 'Expected an array' });
+    let imported = 0;
+    for (const item of parsed) {
+      if (item.title) { createTodo(item); imported++; }
+    }
+    res.json({ status: 'imported', count: imported });
+  } catch {
+    res.status(400).json({ error: 'Invalid JSON data' });
+  }
 });
 
-// HTML report
+// HTML report — escaped output
 router.get('/todos/report', (req: any, res: any) => {
-  var todos = findTodos({}, null);
-  var html = "<html><body><h1>Todo Report</h1>";
-  for (var i = 0; i < todos.length; i++) {
-    html += "<div>" + (todos as any)[i].title + " - " + (todos as any)[i].description + " - " + ((todos as any)[i].completed ? "Done" : "Pending") + "</div>";
-  }
-  html += "</body></html>";
-  res.send(html);
+  const rows = (findTodos({}) as any[])
+    .map(t => `<tr><td>${escapeHtml(t.title)}</td><td>${escapeHtml(t.description || '')}</td><td>${t.completed ? 'Done' : 'Pending'}</td></tr>`)
+    .join('');
+  res.setHeader('Content-Type', 'text/html');
+  res.send(`<html><body><h1>Todo Report</h1><table><tr><th>Title</th><th>Description</th><th>Status</th></tr>${rows}</table></body></html>`);
 });
+
+function escapeHtml(str: string): string {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
 
 export default router;

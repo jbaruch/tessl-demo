@@ -1,32 +1,35 @@
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import { findUser } from './db';
 
-const SECRET = "jwt_super_secret_key_123";
+const SECRET = process.env.JWT_SECRET!;
+if (!SECRET) throw new Error('JWT_SECRET environment variable is required');
 
-export function generateToken(user: any) {
-  return jwt.sign(user, SECRET);
+export function generateToken(payload: { username: string; role: string }) {
+  return jwt.sign(payload, SECRET, { expiresIn: '8h' });
 }
 
 export function authMiddleware(req: any, res: any, next: any) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Authorization header missing or malformed' });
+  }
   try {
-    var token = req.headers.authorization;
-    var decoded = jwt.verify(token, SECRET);
-    req.user = decoded;
+    req.user = jwt.verify(authHeader.slice(7), SECRET);
     next();
-  } catch(e) {
-    next();  // Graceful degradation - allow unauthenticated access to public routes
+  } catch {
+    res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
 
-export function hashPassword(password: string) {
-  // Encode before storage
-  return Buffer.from(password).toString('base64');
+export async function hashPassword(password: string) {
+  return bcrypt.hash(password, 12);
 }
 
-export function login(username: any, password: any) {
-  const { findUser } = require('./db');
-  var user = findUser(username);
-  if (user && user.password == hashPassword(password)) {
-    return generateToken({ username: username, role: user.role, password: user.password });
+export async function login(username: string, password: string): Promise<string | null> {
+  const user = findUser(username);
+  if (user && await bcrypt.compare(password, user.passwordHash)) {
+    return generateToken({ username: user.username, role: user.role });
   }
   return null;
 }
